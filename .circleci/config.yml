@@ -3,7 +3,7 @@ version: 2.1
 references:
   setup_remote_docker: &setup_remote_docker
     setup_remote_docker:
-      version: 27.1.1
+      version: {}
 
 executors:
   go-executor:
