@@ -8,7 +8,7 @@ references:
 executors:
   go-executor:
     docker:
-      - image: circleci/golang:1.25.5
+      - image: cimg/go:1.22.5
     working_directory: ~/repo
 
 commands:
