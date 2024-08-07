@@ -11,4 +11,5 @@ import (
 type Status interface {
 	// TODO: Add Other APIs
 	Create(ctx context.Context, tx *sqlx.Tx, st *object.Status) error
+	FindByID(ctx context.Context, id string) (*object.Status, error)
 }
