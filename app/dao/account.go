@@ -40,7 +40,7 @@ func (a *account) FindByUsername(ctx context.Context, username string) (*object.
 	err := a.db.QueryRowxContext(ctx, "select * from account where username = ?", username).StructScan(entity)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, nil
+			return nil, fmt.Errorf("no user found with the given username: %w", err)
 		}
 
 		return nil, fmt.Errorf("failed to find account from db: %w", err)
