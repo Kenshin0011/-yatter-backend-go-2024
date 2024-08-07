@@ -377,7 +377,7 @@ paths:
             schema:
               type: object
               properties:
-                status:
+                content:
                   type: string
                   example: ピタ ゴラ スイッチ♪
                   description: The text of the status

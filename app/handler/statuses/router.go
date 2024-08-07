@@ -18,16 +18,17 @@ type handler struct {
 func NewRouter(ar repository.Account, su usecase.Status) http.Handler {
 	r := chi.NewRouter()
 
+	h := &handler{
+		statusUsecase: su,
+	}
 	// r.Group()により、特定のグループに対してミドルウェアを適用する
 	// グループに対して適用されたミドルウェアは、そのグループに属する全てのエンドポイントに対して適用される
 	r.Group(func(r chi.Router) {
 		// リクエストの認証を行う
 		r.Use(auth.Middleware(ar))
-		h := &handler{
-			statusUsecase: su,
-		}
 		r.Post("/", h.Create)
 	})
+	r.Get("/{id}", h.FindByID)
 
 	return r
 }
