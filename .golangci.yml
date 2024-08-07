@@ -1,21 +1,18 @@
 run:
-  skip-dirs:
-    - vendor
 linters:
   disable-all: true
   enable:
-    - deadcode
     - errcheck
     - gosimple
     - govet
     - ineffassign
     - staticcheck
-    - structcheck
     - typecheck
     - unused
-    - varcheck
     - misspell
 issues:
+  exclude-dirs:
+    - vendor
   exclude:
     - '\bif block ends with a return statement\b'
     - '\bcomment on exported\b'
