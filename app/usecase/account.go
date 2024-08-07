@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"log"
 	"yatter-backend-go/app/domain/object"
 	"yatter-backend-go/app/domain/repository"
 
@@ -46,13 +47,22 @@ func (a *account) Create(ctx context.Context, username, password string) (*Creat
 		return nil, err
 	}
 
-	defer func() {
-		if err := recover(); err != nil {
-			tx.Rollback()
-		}
-
-		tx.Commit()
-	}()
+    defer func() {
+        if p := recover(); p != nil {
+            if rbErr := tx.Rollback(); rbErr != nil {
+                log.Printf("rollback error: %v", rbErr)
+            }
+            panic(p)
+        } else if err != nil {
+            if rbErr := tx.Rollback(); rbErr != nil {
+                log.Printf("rollback error: %v", rbErr)
+            }
+        } else {
+            if commitErr := tx.Commit(); commitErr != nil {
+                log.Printf("commit error: %v", commitErr)
+            }
+        }
+    }()
 
 	if err := a.accountRepo.Create(ctx, tx, acc); err != nil {
 		return nil, err
