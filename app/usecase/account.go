@@ -2,7 +2,8 @@ package usecase
 
 import (
 	"context"
-	"log"
+	"fmt"
+
 	"yatter-backend-go/app/domain/object"
 	"yatter-backend-go/app/domain/repository"
 
@@ -42,31 +43,19 @@ func (a *account) Create(ctx context.Context, username, password string) (*Creat
 		return nil, err
 	}
 
-	tx, err := a.db.Beginx()
-	if err != nil {
-		return nil, err
-	}
-
-    defer func() {
-        if p := recover(); p != nil {
-            if rbErr := tx.Rollback(); rbErr != nil {
-                log.Printf("rollback error: %v", rbErr)
-            }
-            panic(p)
-        } else if err != nil {
-            if rbErr := tx.Rollback(); rbErr != nil {
-                log.Printf("rollback error: %v", rbErr)
-            }
-        } else {
-            if commitErr := tx.Commit(); commitErr != nil {
-                log.Printf("commit error: %v", commitErr)
-            }
+	unitOfWork := NewUnitOfWork(a.db)
+	err = unitOfWork.Do(ctx, func(tx *sqlx.Tx) error {
+        err = a.accountRepo.Create(ctx, tx, acc)
+		fmt.Println(err)
+        if err != nil {
+            return fmt.Errorf("failed to create account: %w", err)
         }
-    }()
+        return nil
+    })
 
-	if err := a.accountRepo.Create(ctx, tx, acc); err != nil {
-		return nil, err
-	}
+    if err != nil {
+        return nil, err
+    }
 
 	return &CreateAccountDTO{
 		Account: acc,

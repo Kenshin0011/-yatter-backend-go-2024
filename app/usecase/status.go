@@ -2,7 +2,6 @@ package usecase
 
 import (
 	"context"
-	"log"
 	"yatter-backend-go/app/domain/object"
 	"yatter-backend-go/app/domain/repository"
 
@@ -43,32 +42,14 @@ func (s *status) Create(ctx context.Context, account_id int,content string) (*Cr
 		return nil, err
 	}
 
-	tx, err := s.db.Beginx()
-	if err != nil {
-		return nil, err
-	}
-
-	defer func() {
-        if p := recover(); p != nil {
-            if rbErr := tx.Rollback(); rbErr != nil {
-                log.Printf("rollback error: %v", rbErr)
-            }
-            panic(p)
-        } else if err != nil {
-            if rbErr := tx.Rollback(); rbErr != nil {
-                log.Printf("rollback error: %v", rbErr)
-            }
-        } else {
-            if commitErr := tx.Commit(); commitErr != nil {
-                log.Printf("commit error: %v", commitErr)
-            }
-        }
-    }()
-
-
-	if err := s.statusRepo.Create(ctx, tx, st); err != nil {
-		return nil, err
-	}
+	unitOfWork := NewUnitOfWork(s.db)
+	err = unitOfWork.Do(ctx, func(tx *sqlx.Tx) error {
+		err = s.statusRepo.Create(ctx, tx, st)
+		if err != nil {
+			return err
+		}
+		return nil
+	})
 
 	return &CreateStatusDTO{
 		Status: st,
