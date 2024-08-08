@@ -46,3 +46,13 @@ func (s *status) FindByID(ctx context.Context, id string) (*object.Status, error
 	}
 	return entity, nil
 }
+
+func (s *status) FindPublicTimeline(ctx context.Context, limit int) ([]*object.Status, error) {
+	var entities []*object.Status
+
+	err := s.db.SelectContext(ctx, &entities, "select * from status order by id desc limit ?", limit)
+	if err != nil {
+		return nil, fmt.Errorf("failed to find status from db: %w", err)
+	}
+	return entities, nil
+}

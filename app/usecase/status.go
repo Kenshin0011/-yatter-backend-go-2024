@@ -12,6 +12,7 @@ import (
 type Status interface {
 	Create(ctx context.Context, account_id int, content string) (*CreateStatusDTO, error)
 	FindByID(ctx context.Context, id string) (*GetStatusDTO, error)
+	FindPublicTimeline(ctx context.Context, limit int) ([]*object.Status, error)
 }
 
 type status struct {
@@ -83,4 +84,13 @@ func (s *status) FindByID(ctx context.Context, id string) (*GetStatusDTO, error)
 	return &GetStatusDTO{
 		Status: st,
 	}, nil
+}
+
+func (s *status) FindPublicTimeline(ctx context.Context, limit int) ([]*object.Status, error) {
+	st, err := s.statusRepo.FindPublicTimeline(ctx, limit)
+	if err != nil {
+		return nil, err
+	}
+
+	return st, nil
 }
