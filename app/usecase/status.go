@@ -16,7 +16,8 @@ type Status interface {
 
 type status struct {
 	db          *sqlx.DB
-	statusRepo repository.Status
+	statusRepo 	repository.Status
+	unitOfWork  UnitOfWork
 }
 
 type CreateStatusDTO struct {
@@ -29,10 +30,11 @@ type GetStatusDTO struct {
 
 var _ Status = (*status)(nil)
 
-func NewStatus(db *sqlx.DB, statusRepo repository.Status) *status {
+func NewStatus(db *sqlx.DB, statusRepo repository.Status, unitOfWork UnitOfWork) *status {
 	return &status{
 		db:          db,
-		statusRepo: statusRepo,
+		statusRepo:  statusRepo,
+		unitOfWork:  unitOfWork,
 	}
 }
 
@@ -42,8 +44,7 @@ func (s *status) Create(ctx context.Context, account_id int,content string) (*Cr
 		return nil, err
 	}
 
-	unitOfWork := NewUnitOfWork(s.db)
-	err = unitOfWork.Do(ctx, func(tx *sqlx.Tx) error {
+	err = s.unitOfWork.Do(ctx, func(tx *sqlx.Tx) error {
 		err = s.statusRepo.Create(ctx, tx, st)
 		if err != nil {
 			return err

@@ -18,6 +18,7 @@ type Account interface {
 type account struct {
 	db          *sqlx.DB
 	accountRepo repository.Account
+	unitOfWork  UnitOfWork
 }
 
 type CreateAccountDTO struct {
@@ -30,10 +31,11 @@ type GetAccountDTO struct {
 
 var _ Account = (*account)(nil)
 
-func NewAcocunt(db *sqlx.DB, accountRepo repository.Account) *account {
+func NewAcocunt(db *sqlx.DB, accountRepo repository.Account, unitOfWork UnitOfWork) *account {
 	return &account{
 		db:          db,
 		accountRepo: accountRepo,
+		unitOfWork:  unitOfWork,
 	}
 }
 
@@ -43,10 +45,8 @@ func (a *account) Create(ctx context.Context, username, password string) (*Creat
 		return nil, err
 	}
 
-	unitOfWork := NewUnitOfWork(a.db)
-	err = unitOfWork.Do(ctx, func(tx *sqlx.Tx) error {
+	err = a.unitOfWork.Do(ctx, func(tx *sqlx.Tx) error {
         err = a.accountRepo.Create(ctx, tx, acc)
-		fmt.Println(err)
         if err != nil {
             return fmt.Errorf("failed to create account: %w", err)
         }

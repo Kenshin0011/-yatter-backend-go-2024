@@ -26,8 +26,9 @@ func Run() error {
 	addr := ":" + strconv.Itoa(config.Port())
 	log.Printf("Serve on http://%s", addr)
 
-	accountUsecase := usecase.NewAcocunt(db, dao.NewAccount(db))
-	statusUsecase := usecase.NewStatus(db, dao.NewStatus(db))
+	unitOfWork := usecase.NewUnitOfWork(db)
+	accountUsecase := usecase.NewAcocunt(db, dao.NewAccount(db), unitOfWork)
+	statusUsecase := usecase.NewStatus(db, dao.NewStatus(db), unitOfWork)
 
 	r := handler.NewRouter(
 		accountUsecase, dao.NewAccount(db),

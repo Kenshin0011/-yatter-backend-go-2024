@@ -26,7 +26,7 @@ func NewAccount(db *sqlx.DB) *account {
 }
 
 func (a *account) Create(ctx context.Context, tx *sqlx.Tx, acc *object.Account) error {
-	_, err := a.db.Exec("insert into account (username, password_hash, display_name, avatar, header, note, create_at) values (?, ?, ?, ?, ?, ?, ?)",
+	_, err := tx.Exec("insert into account (username, password_hash, display_name, avatar, header, note, create_at) values (?, ?, ?, ?, ?, ?, ?)",
 		acc.Username, acc.PasswordHash, acc.DisplayName, acc.Avatar, acc.Header, acc.Note, acc.CreateAt)
 	if err != nil {
 		return fmt.Errorf("failed to insert account: %w", err)
