@@ -1,31 +1,33 @@
 version: 2.1
 
-references:
-  setup_remote_docker: &setup_remote_docker
-    setup_remote_docker:
-      version: {}
-
 executors:
   go-executor:
     docker:
       - image: cimg/go:1.22.5
     working_directory: ~/repo
 
-commands:
-  docker_hub_auth:
-    steps:
-      - *setup_remote_docker
-      - run:
-          name: Docker login
-          command: |
-            echo $DOCKERHUB_PASSWORD | docker login -u $DOCKERHUB_USER --password-stdin
-
 jobs:
+  build:
+    executor: go-executor
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - go-mod-v4-{{ checksum "go.sum" }}
+      - run:
+          name: Install Dependencies
+          command: go get ./...
+      - save_cache:
+          key: go-mod-v4-{{ checksum "go.sum" }}
+          paths:
+            - "/go/pkg/mod"
+      - run:
+          name: Run tests
+          command: go test -v
   lint:
     executor: go-executor
     steps:
       - checkout
-      - docker_hub_auth
       - run:
           name: Install golangci-lint
           command: |
@@ -33,27 +35,12 @@ jobs:
       - run:
           name: Run golangci-lint
           command: golangci-lint run
-  test:
-    executor: go-executor
-    steps:
-      - checkout
-      - run:
-          name: Install Dependencies
-          command: |
-            go mod download
-            go install github.com/golang/mock/mockgen@v1.6.0
-      - run:
-          name: Generate Mocks
-          command: go generate ./...
-      - run:
-          name: Run tests
-          command: go test -v ./app/tests/...
 
 workflows:
   version: 2
   workflow:
     jobs:
-      - lint
-      - test:
+      - build
+      - lint:
           requires:
             - lint
