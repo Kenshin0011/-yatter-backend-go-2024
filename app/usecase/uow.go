@@ -29,7 +29,9 @@ func (u *unitOfWork) Do(ctx context.Context, f func(tx *sqlx.Tx) error) error {
 
 	defer func() {
         if v := recover(); v != nil {
-            tx.Rollback()
+			if rerr := tx.Rollback(); rerr != nil {
+				err = fmt.Errorf("%w: rolling back transaction: %v", err, rerr)
+			}
             panic(v)
         }
     }()
