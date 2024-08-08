@@ -44,8 +44,7 @@ jobs:
             go install github.com/golang/mock/mockgen@v1.6.0
       - run:
           name: Generate Mocks
-          command: |
-            mockgen -source=repository/account_repository.go -destination=mocks/mock_account_repository.go -package=mocks
+          command: go generate ./...
       - run:
           name: Run tests
           command: go test -v ./test/...
