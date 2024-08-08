@@ -40,7 +40,7 @@ workflows:
   version: 2
   workflow:
     jobs:
-      - build
-      - lint:
+      - lint
+      - build:
           requires:
             - lint
