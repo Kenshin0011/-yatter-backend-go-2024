@@ -26,7 +26,7 @@ func NewStatus(db *sqlx.DB) *status {
 }
 
 func (s *status) Create(ctx context.Context, tx *sqlx.Tx, st *object.Status) error {
-	_, err := s.db.Exec("insert into status (account_id, content, create_at) values (?, ?, ?)", st.AccountID, st.Content, st.CreateAt)
+	_, err := tx.Exec("insert into status (account_id, content, create_at) values (?, ?, ?)", st.AccountID, st.Content, st.CreateAt)
 	if err != nil {
 		return fmt.Errorf("failed to insert status: %w", err)
 	}
