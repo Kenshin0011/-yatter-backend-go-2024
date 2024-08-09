@@ -23,7 +23,7 @@ jobs:
             - "/go/pkg/mod"
       - run:
           name: Run tests
-          command: go test -v
+          command: go test -v ./…
   lint:
     executor: go-executor
     steps:
