@@ -9,40 +9,33 @@ import (
 )
 
 type Status interface {
-	Create(ctx context.Context, account_id int, content string) (*CreateStatusDTO, error)
-	FindByID(ctx context.Context, id string) (*GetStatusDTO, error)
+	Create(ctx context.Context, account_id int, content string) (*StatusDTO, error)
+	FindByID(ctx context.Context, id string) (*StatusDTO, error)
 	FindPublicTimeline(ctx context.Context, limit int) ([]*object.Status, error)
 }
 
+type StatusDTO struct {
+	Status object.Status
+}
+
 type status struct {
-	db          *sqlx.DB
 	statusRepo 	repository.Status
 	unitOfWork  UnitOfWork
 }
 
-type CreateStatusDTO struct {
-	Status *object.Status
+func NewStatus(db *sqlx.DB, statusRepo repository.Status, unitOfWork UnitOfWork) Status {
+	return &status{statusRepo, unitOfWork}
 }
 
-type GetStatusDTO struct {
-	Status *object.Status
-}
-
-var _ Status = (*status)(nil)
-
-func NewStatus(db *sqlx.DB, statusRepo repository.Status, unitOfWork UnitOfWork) *status {
-	return &status{
-		db:          db,
-		statusRepo:  statusRepo,
-		unitOfWork:  unitOfWork,
-	}
-}
-
-func (s *status) Create(ctx context.Context, account_id int,content string) (*CreateStatusDTO, error) {
+func (s *status) Create(ctx context.Context, account_id int, content string) (*StatusDTO, error) {
 	st, err := object.NewStatus(account_id, content)
 	if err != nil {
 		return nil, err
 	}
+
+	// if err := s.statusRepo.Create(ctx, nil, st); err != nil {
+	// 	return nil, fmt.Errorf("failed to create status:(accountID: %d): %v", st.AccountID ,err)
+	// }
 
 	err = s.unitOfWork.Do(ctx, func(tx *sqlx.Tx) error {
 		err = s.statusRepo.Create(ctx, tx, st)
@@ -52,19 +45,19 @@ func (s *status) Create(ctx context.Context, account_id int,content string) (*Cr
 		return nil
 	})
 
-	return &CreateStatusDTO{
-		Status: st,
+	return &StatusDTO{
+		Status: *st,
 	}, nil
 }
 
-func (s *status) FindByID(ctx context.Context, id string) (*GetStatusDTO, error) {
+func (s *status) FindByID(ctx context.Context, id string) (*StatusDTO, error) {
 	st, err := s.statusRepo.FindByID(ctx, id)
 	if err != nil {
 		return nil, err
 	}
 
-	return &GetStatusDTO{
-		Status: st,
+	return &StatusDTO{
+		Status: *st,
 	}, nil
 }
 

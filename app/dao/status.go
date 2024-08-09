@@ -11,24 +11,35 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-type (
-	// Implementation for repository.Account
-	status struct {
-		db *sqlx.DB
-	}
-)
-
-var _ repository.Status = (*status)(nil)
+type status struct {
+	db *sqlx.DB
+}
 
 // Create accout repository
-func NewStatus(db *sqlx.DB) *status {
+func NewStatus(db *sqlx.DB) repository.Status {
 	return &status{db: db}
 }
 
 func (s *status) Create(ctx context.Context, tx *sqlx.Tx, st *object.Status) error {
-	_, err := tx.Exec("insert into status (account_id, content, create_at) values (?, ?, ?)", st.AccountID, st.Content, st.CreateAt)
+	q := `
+	INSERT INTO status (account_id, url, content, create_at)
+	VALUES (:account_id, :url, :content, :create_at);
+	`
+
+	q, params, err := sqlx.Named(q, map[string]interface{}{
+		"account_id": st.AccountID,
+		"url": st.URL,
+		"content": st.Content,
+		"create_at": st.CreateAt,
+	})
+
 	if err != nil {
 		return fmt.Errorf("failed to insert status: %w", err)
+	}
+		
+	_, err = tx.ExecContext(ctx, q, params)
+	if err != nil {
+		return fmt.Errorf("%s: %v",q, err)
 	}
 
 	return nil

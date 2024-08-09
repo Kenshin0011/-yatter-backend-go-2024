@@ -9,7 +9,7 @@ import (
 
 // Request body for `POST /v1/statuses`
 type AddRequest struct {
-	Content string
+	Status string
 }
 
 // Handle request for `POST /v1/statuses`
@@ -24,7 +24,7 @@ func (h *handler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dto, err := h.statusUsecase.Create(ctx, int(account_info.ID), req.Content)
+	dto, err := h.statusUsecase.Create(ctx, int(account_info.ID), req.Status)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
