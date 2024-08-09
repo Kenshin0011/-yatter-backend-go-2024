@@ -8,6 +8,7 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
+//go:generate moq -out status_mock.go -pkg mocks. Status
 type Status interface {
 	// TODO: Add Other APIs
 	Create(ctx context.Context, tx *sqlx.Tx, st *object.Status) error
