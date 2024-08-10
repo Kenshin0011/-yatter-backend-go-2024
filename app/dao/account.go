@@ -50,7 +50,6 @@ func (a *account) Create(ctx context.Context, tx *sqlx.Tx, acc *entity.Account) 
 func (a *account) FindByUsername(ctx context.Context, username string) (*entity.Account, error) {
 	entity := new(entity.Account)
 	err := a.db.QueryRowxContext(ctx, "select * from account where username = ?", username).StructScan(entity)
-	fmt.Println(username)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, fmt.Errorf("no user found with the given username: %w", err)

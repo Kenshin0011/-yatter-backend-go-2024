@@ -20,7 +20,6 @@ func (h *handler) Create(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	account_info := auth.AccountOf(r.Context()) // 認証情報を取得する
-	fmt.Println(account_info)
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
