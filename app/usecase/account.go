@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"yatter-backend-go/app/domain/object"
+	"yatter-backend-go/app/domain/entity"
 	"yatter-backend-go/app/domain/repository"
 
 	"github.com/jmoiron/sqlx"
@@ -22,11 +22,11 @@ type account struct {
 }
 
 type CreateAccountDTO struct {
-	Account *object.Account
+	Account *entity.Account
 }
 
 type GetAccountDTO struct {
-	Account *object.Account
+	Account *entity.Account
 }
 
 var _ Account = (*account)(nil)
@@ -40,7 +40,7 @@ func NewAcocunt(db *sqlx.DB, accountRepo repository.Account, unitOfWork UnitOfWo
 }
 
 func (a *account) Create(ctx context.Context, username, password string) (*CreateAccountDTO, error) {
-	acc, err := object.NewAccount(username, password)
+	acc, err := entity.NewAccount(username, password)
 	if err != nil {
 		return nil, err
 	}
