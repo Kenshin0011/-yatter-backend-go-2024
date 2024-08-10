@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"yatter-backend-go/app/domain/object"
+	"yatter-backend-go/app/domain/entity"
 	"yatter-backend-go/app/domain/repository"
 
 	"github.com/jmoiron/sqlx"
@@ -25,8 +25,12 @@ func NewStatus(db *sqlx.DB) *status {
 	return &status{db: db}
 }
 
-func (s *status) Create(ctx context.Context, tx *sqlx.Tx, st *object.Status) error {
-	_, err := tx.Exec("insert into status (account_id, content, create_at) values (?, ?, ?)", st.AccountID, st.Content, st.CreateAt)
+func (s *status) Create(ctx context.Context, tx *sqlx.Tx, st *entity.Status) error {
+	_, err := tx.ExecContext(ctx, "INSERT INTO status (account_id, content, create_at) values (?, ?, ?)",
+		st.AccountID.Value(), 
+		st.Content, 
+		st.CreateAt,
+	)
 	if err != nil {
 		return fmt.Errorf("failed to insert status: %w", err)
 	}
@@ -34,8 +38,8 @@ func (s *status) Create(ctx context.Context, tx *sqlx.Tx, st *object.Status) err
 	return nil
 }
 
-func (s *status) FindByID(ctx context.Context, id string) (*object.Status, error) {
-	entity := new(object.Status)
+func (s *status) FindByID(ctx context.Context, id string) (*entity.Status, error) {
+	entity := new(entity.Status)
 	err := s.db.QueryRowxContext(ctx, "select * from status where id = ?", id).StructScan(entity)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -47,8 +51,8 @@ func (s *status) FindByID(ctx context.Context, id string) (*object.Status, error
 	return entity, nil
 }
 
-func (s *status) FindPublicTimeline(ctx context.Context, limit int) ([]*object.Status, error) {
-	var entities []*object.Status
+func (s *status) FindPublicTimeline(ctx context.Context, limit int) ([]*entity.Status, error) {
+	var entities []*entity.Status
 
 	err := s.db.SelectContext(ctx, &entities, "select * from status order by id desc limit ?", limit)
 	if err != nil {

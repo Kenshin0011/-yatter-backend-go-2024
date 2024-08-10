@@ -2,16 +2,17 @@ package usecase
 
 import (
 	"context"
-	"yatter-backend-go/app/domain/object"
+	"yatter-backend-go/app/domain/entity"
 	"yatter-backend-go/app/domain/repository"
+	vo "yatter-backend-go/app/domain/value-object"
 
 	"github.com/jmoiron/sqlx"
 )
 
 type Status interface {
-	Create(ctx context.Context, account_id int, content string) (*CreateStatusDTO, error)
+	Create(ctx context.Context, account_id vo.AccountID, content string) (*CreateStatusDTO, error)
 	FindByID(ctx context.Context, id string) (*GetStatusDTO, error)
-	FindPublicTimeline(ctx context.Context, limit int) ([]*object.Status, error)
+	FindPublicTimeline(ctx context.Context, limit int) ([]*entity.Status, error)
 }
 
 type status struct {
@@ -21,11 +22,11 @@ type status struct {
 }
 
 type CreateStatusDTO struct {
-	Status *object.Status
+	Status *entity.Status
 }
 
 type GetStatusDTO struct {
-	Status *object.Status
+	Status *entity.Status
 }
 
 var _ Status = (*status)(nil)
@@ -38,8 +39,8 @@ func NewStatus(db *sqlx.DB, statusRepo repository.Status, unitOfWork UnitOfWork)
 	}
 }
 
-func (s *status) Create(ctx context.Context, account_id int,content string) (*CreateStatusDTO, error) {
-	st, err := object.NewStatus(account_id, content)
+func (s *status) Create(ctx context.Context, account_id vo.AccountID,content string) (*CreateStatusDTO, error) {
+	st, err := entity.NewStatus(account_id, content)
 	if err != nil {
 		return nil, err
 	}
@@ -68,7 +69,7 @@ func (s *status) FindByID(ctx context.Context, id string) (*GetStatusDTO, error)
 	}, nil
 }
 
-func (s *status) FindPublicTimeline(ctx context.Context, limit int) ([]*object.Status, error) {
+func (s *status) FindPublicTimeline(ctx context.Context, limit int) ([]*entity.Status, error) {
 	st, err := s.statusRepo.FindPublicTimeline(ctx, limit)
 	if err != nil {
 		return nil, err

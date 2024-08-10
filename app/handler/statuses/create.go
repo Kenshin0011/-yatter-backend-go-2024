@@ -1,10 +1,12 @@
 package statuses
 
 import (
-	"fmt"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"yatter-backend-go/app/domain/auth"
+
+	vo "yatter-backend-go/app/domain/value-object"
 )
 
 // Request body for `POST /v1/statuses`
@@ -18,13 +20,19 @@ func (h *handler) Create(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	account_info := auth.AccountOf(r.Context()) // 認証情報を取得する
-	
+
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	dto, err := h.statusUsecase.Create(ctx, int(account_info.ID), req.Content)
+	accountID, err := vo.NewAccountID(account_info.ID.Value())
+	if err != nil {
+		http.Error(w, "Invalid account ID", http.StatusBadRequest)
+		return
+	}
+
+	dto, err := h.statusUsecase.Create(ctx, *accountID, req.Content)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
