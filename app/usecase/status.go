@@ -4,12 +4,13 @@ import (
 	"context"
 	"yatter-backend-go/app/domain/entity"
 	"yatter-backend-go/app/domain/repository"
+	vo "yatter-backend-go/app/domain/value-object"
 
 	"github.com/jmoiron/sqlx"
 )
 
 type Status interface {
-	Create(ctx context.Context, account_id int, content string) (*CreateStatusDTO, error)
+	Create(ctx context.Context, account_id vo.AccountID, content string) (*CreateStatusDTO, error)
 	FindByID(ctx context.Context, id string) (*GetStatusDTO, error)
 	FindPublicTimeline(ctx context.Context, limit int) ([]*entity.Status, error)
 }
@@ -38,7 +39,7 @@ func NewStatus(db *sqlx.DB, statusRepo repository.Status, unitOfWork UnitOfWork)
 	}
 }
 
-func (s *status) Create(ctx context.Context, account_id int,content string) (*CreateStatusDTO, error) {
+func (s *status) Create(ctx context.Context, account_id vo.AccountID,content string) (*CreateStatusDTO, error) {
 	st, err := entity.NewStatus(account_id, content)
 	if err != nil {
 		return nil, err

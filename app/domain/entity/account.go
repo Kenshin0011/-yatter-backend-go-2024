@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"time"
 
+	vo "yatter-backend-go/app/domain/value-object"
+
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -13,7 +15,7 @@ import (
 
 type Account struct {
 	// The internal ID of the account
-	ID int `json:"id,omitempty"`
+	ID vo.AccountID `json:"id,omitempty"`
 
 	// The username of the account
 	Username string `json:"username,omitempty"`
